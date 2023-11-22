@@ -43,7 +43,7 @@ def get_args():
                         '--zoffset',
                         help='Z-axis offset',
                         metavar='z-offset',
-                        type=int,
+                        type=float,
                         required=True)
 
     parser.add_argument('-o',

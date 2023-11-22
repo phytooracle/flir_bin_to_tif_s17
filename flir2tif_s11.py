@@ -44,7 +44,7 @@ def get_args():
                         help='Z-axis offset',
                         metavar='z-offset',
                         type=int,
-                        default=0.76)#0.76
+                        required=True)
 
     parser.add_argument('-o',
                         '--outdir',

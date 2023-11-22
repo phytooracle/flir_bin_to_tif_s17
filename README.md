@@ -16,7 +16,8 @@ Decompressed flir geotiffs from `.bin` to `.tif`.
 ## Arguments and Flags
 - **Required Arguments:** 
     - **Directory of flir files to decompress:** 'bin'
-    - **raw metadata files:** '-m', '--metadata' 
+    - **raw metadata files:** '-m', '--metadata'
+    - **Z-axis offset:** '-z', '--zoffset'
 
 - **Optional Arguments**
     - **Output directory:** '-o', '--outdir', default='flir2tif_out/'

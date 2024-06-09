@@ -7,6 +7,22 @@ Differences between s10 and s11:
 - S11 only contains center of agricultural plots, therefore no GCP lids are detectable. This is taken into consideration.
 - Apart from removing the S10 correction, the code used is very similar to the one for s10.
 
+Note that image height and width are collected from the provided metadata, including:
+
+```
+    img_height, img_width = 640, 480
+```
+
+Also, a experimentally derived offset is applied:
+
+```
+    # TERRA-REF
+    lon_shift = 0.000020308287
+
+    # Drone
+    lat_shift = 0.000018292 #0.000015258894
+```
+
 ## Inputs
 
 Raw metadata and BIN files.

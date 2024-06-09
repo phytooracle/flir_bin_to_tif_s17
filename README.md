@@ -1,4 +1,4 @@
-# Flir bin2tif for s11 (Sorghum)
+# FLIR BIN2TIF - Season 11, Sorghum
 
 This script converts BIN files to GeoTIFF images for thermal (FLIR) sensors.
 

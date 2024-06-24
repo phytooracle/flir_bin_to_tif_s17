@@ -5,18 +5,22 @@ This module includes a conversion for digital number to temperature by using cam
 
 Note that some values are collected from the provided metadata, including:
 
+sensor_fixed_metadata
 ```
-    sensor_fixed_metadata
     location in camera box x [m]
     location in camera box y [m]
     location in camera box z [m]
     field of view x [m]
     field of view y [m]
-    gantry_system_variable_metadata
+```
+gantry_system_variable_metadata
+```
     position x [m]
     position y [m]
     position z [m]
-    sensor_variable_metadata
+```
+sensor_variable_metadata
+```
     shutter temperature [K]
 ```
 

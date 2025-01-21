@@ -144,8 +144,7 @@ def flirRawToTemperature(rawData, calibP):
     H2OInGperM2 = H*math.exp(H2O_K1 + H2O_K2*T + H2O_K3*math.pow(T, 2) + H2O_K4*math.pow(T, 3))
     
     # Atmospheric Transmission Correction Tau
-    tau = (X * math.exp(-math.sqrt(D / 2) * (a1 + b1 * math.sqrt(H2OInGperM2))) 
-           + (1 - X) * math.exp(-math.sqrt(D / 2) * (a2 + b2 * math.sqrt(H2OInGperM2))))
+    tau = (X * math.exp(-math.sqrt(D / 2) * (a1 + b1 * math.sqrt(H2OInGperM2))) + (1 - X) * math.exp(-math.sqrt(D / 2) * (a2 + b2 * math.sqrt(H2OInGperM2))))
 
     # Object Radiation obj_rad = Theoretical object radiation * emissivity * atmospheric transmission
     obj_rad = im * E * tau

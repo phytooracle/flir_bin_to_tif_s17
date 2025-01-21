@@ -34,4 +34,4 @@ USER root
 
 COPY *.py /home/extractor/
 
-ENTRYPOINT [ "/usr/bin/python3", "/opt/flir2tif_s11.py" ]
+ENTRYPOINT [ "/usr/bin/python3", "/opt/flir2tif_s17.py" ]

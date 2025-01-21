@@ -152,11 +152,11 @@ def flirRawToTemperature(rawData, calibP):
 
     # Atmospheric Radiation atm_rad= (1 - atmospheric transmission) * Theoretical atmospheric radiation
     theo_atm_rad = (R * J1 / (math.exp(B / shutter_temp) - F)) + J0
-    atm_rad = repmat((1 - tau) * theo_atm_rad, 640, 480)
+    atm_rad = np.tile((1 - tau) * theo_atm_rad, (640, 480))
 
     # Ambient Reflection Radiation: amb_refl_rad = (1 - emissivity) * atmospheric transmission * Theoretical Ambient Reflection Radiation
     theo_amb_refl_rad = (R * J1 / (math.exp(B / shutter_temp) - F)) + J0
-    amb_refl_rad = repmat((1 - E) * tau * theo_amb_refl_rad, 640, 480)
+    amb_refl_rad = np.tile((1 - E) * tau * theo_amb_refl_rad, (640, 480))
 
     # Total Radiation
     corr_pxl_val = obj_rad + atm_rad + amb_refl_rad

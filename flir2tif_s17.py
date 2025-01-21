@@ -110,6 +110,8 @@ def get_boundingbox(metadata, z_offset):
 
 # --------------------------------------------------
 def flirRawToTemperature(rawData, calibP):
+    im = rawData
+    
     # Camera-Specific constants output by FLIR camera 
     R = 19526.943359#float(calibP['sensor_fixed_metadata']['calibration R']) # Function of integration time and wavelength; Planck Constant
     B = 1477.599976#float(calibP['sensor_fixed_metadata']['calibration B']) # Function of wavelength; Planck Constant
@@ -162,7 +164,6 @@ def flirRawToTemperature(rawData, calibP):
     # Total Radiation
     corr_pxl_val = obj_rad + atm_rad + amb_refl_rad
     
-    im = rawData
     pxl_temp = B / np.log(R /(corr_pxl_val - J0) * J1 + F) - 273.15 # Radial Basis Function (RBF)
 
     return pxl_temp

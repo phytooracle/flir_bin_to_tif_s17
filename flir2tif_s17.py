@@ -19,6 +19,7 @@ from terrautils.formats import create_geotiff
 import matplotlib.pyplot as plt
 from osgeo import gdal, osr
 import math
+from numpy.matlib import repmat
 
 
 # --------------------------------------------------
@@ -110,18 +111,18 @@ def get_boundingbox(metadata, z_offset):
 # --------------------------------------------------
 def flirRawToTemperature(rawData, calibP):
     # Camera-Specific constants output by FLIR camera 
-    R = float(calibP['sensor_fixed_metadata']['calibration R']) # Function of integration time and wavelength; Planck Constant
-    B = float(calibP['sensor_fixed_metadata']['calibration B']) # Function of wavelength; Planck Constant
-    F = float(calibP['sensor_fixed_metadata']['calibration F']) # Positive value (0-1); Planck Constant
-    J1 = float(calibP['sensor_fixed_metadata']['calibration J1']) # Global Gain
-    J0 = float(calibP['sensor_fixed_metadata']['calibration J0']) # Global Offset
+    R = 19526.943359#float(calibP['sensor_fixed_metadata']['calibration R']) # Function of integration time and wavelength; Planck Constant
+    B = 1477.599976#float(calibP['sensor_fixed_metadata']['calibration B']) # Function of wavelength; Planck Constant
+    F = 1.0#float(calibP['sensor_fixed_metadata']['calibration F']) # Positive value (0-1); Planck Constant
+    J1 = 29.777163#float(calibP['sensor_fixed_metadata']['calibration J1']) # Global Gain
+    J0 = 4455.0#float(calibP['sensor_fixed_metadata']['calibration J0']) # Global Offset
 
     # Constant Atmospheric transmission parameter by Flir
-    a1 = float(calibP['sensor_fixed_metadata']['calibration alpha1'])
-    a2 = float(calibP['sensor_fixed_metadata']['calibration alpha2'])
-    X = float(calibP['sensor_fixed_metadata']['calibration X'])
-    b1 = float(calibP['sensor_fixed_metadata']['calibration beta1'])
-    b2 = float(calibP['sensor_fixed_metadata']['calibration beta2'])
+    a1 = 0.006569#float(calibP['sensor_fixed_metadata']['calibration alpha1'])
+    a2 = 0.01262#float(calibP['sensor_fixed_metadata']['calibration alpha2'])
+    X = 1.9#float(calibP['sensor_fixed_metadata']['calibration X'])
+    b1 = -0.002276#float(calibP['sensor_fixed_metadata']['calibration beta1'])
+    b2 = -0.00667#float(calibP['sensor_fixed_metadata']['calibration beta2'])
 
     # Constant for VPD computation (sqtrH2O)
     H2O_K1 = 1.56
@@ -132,7 +133,7 @@ def flirRawToTemperature(rawData, calibP):
     # Environmental factors
     # According to FLIR, atmospheric absorption under 10m object distance can be neglected, expecially under dry desert climate
 	# Assumption: Ambient Temperature ~= Shutter Temperature
-    shutter_temp = float(calibP['sensor_variable_metadata']['shutter temperature [K]'])
+    shutter_temp = 300.1#float(calibP['sensor_variable_metadata']['shutter temperature [K]'])
     T = shutter_temp - 273.15 # Proxy for ambient temperature from the gantry
     H = 0.1 # Gantry Relative Humidity; Try to pull dynamic value if possible
     D = 3.778 # Distance from sensor to target; scans in S17 onwards set camera_ref to 3.5 m from target, resulting in thermal_camera_ref at 3.778 m from target 
@@ -144,6 +145,7 @@ def flirRawToTemperature(rawData, calibP):
     H2OInGperM2 = H*math.exp(H2O_K1 + H2O_K2*T + H2O_K3*math.pow(T, 2) + H2O_K4*math.pow(T, 3))
     
     # Atmospheric Transmission Correction Tau
+    #**********************************************************************************************************************
     tau = (X * math.exp(-math.sqrt(D / 2) * (a1 + b1 * math.sqrt(H2OInGperM2))) + (1 - X) * math.exp(-math.sqrt(D / 2) * (a2 + b2 * math.sqrt(H2OInGperM2))))
 
     # Object Radiation obj_rad = Theoretical object radiation * emissivity * atmospheric transmission
@@ -151,11 +153,11 @@ def flirRawToTemperature(rawData, calibP):
 
     # Atmospheric Radiation atm_rad= (1 - atmospheric transmission) * Theoretical atmospheric radiation
     theo_atm_rad = (R * J1 / (math.exp(B / shutter_temp) - F)) + J0
-    atm_rad = np.tile((1 - tau) * theo_atm_rad, (640, 480))
+    atm_rad = repmat((1 - tau) * theo_atm_rad, 640, 480)
 
     # Ambient Reflection Radiation: amb_refl_rad = (1 - emissivity) * atmospheric transmission * Theoretical Ambient Reflection Radiation
     theo_amb_refl_rad = (R * J1 / (math.exp(B / shutter_temp) - F)) + J0
-    amb_refl_rad = np.tile((1 - E) * tau * theo_amb_refl_rad, (640, 480))
+    amb_refl_rad = repmat((1 - E) * tau * theo_amb_refl_rad, 640, 480)
 
     # Total Radiation
     corr_pxl_val = obj_rad + atm_rad + amb_refl_rad

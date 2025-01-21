@@ -120,11 +120,11 @@ def flirRawToTemperature(rawData, calibP):
     J0 = 4455.0#float(calibP['sensor_fixed_metadata']['calibration J0']) # Global Offset
 
     # Constant Atmospheric transmission parameter by Flir
-    a1 = 0.006569#float(calibP['sensor_fixed_metadata']['calibration alpha1'])
-    a2 = 0.01262#float(calibP['sensor_fixed_metadata']['calibration alpha2'])
-    X = 1.9#float(calibP['sensor_fixed_metadata']['calibration X'])
-    b1 = -0.002276#float(calibP['sensor_fixed_metadata']['calibration beta1'])
-    b2 = -0.00667#float(calibP['sensor_fixed_metadata']['calibration beta2'])
+    a1 = float(calibP['sensor_fixed_metadata']['calibration alpha1'])
+    a2 = float(calibP['sensor_fixed_metadata']['calibration alpha2'])
+    X = float(calibP['sensor_fixed_metadata']['calibration X'])
+    b1 = float(calibP['sensor_fixed_metadata']['calibration beta1'])
+    b2 = float(calibP['sensor_fixed_metadata']['calibration beta2'])
 
     # Constant for VPD computation (sqtrH2O)
     H2O_K1 = 1.56

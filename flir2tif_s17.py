@@ -110,18 +110,18 @@ def get_boundingbox(metadata, z_offset):
 # --------------------------------------------------
 def flirRawToTemperature(rawData, calibP):
     # Camera-Specific constants output by FLIR camera 
-    R = calibP['sensor_fixed_metadata']['calibration R'] # Function of integration time and wavelength; Planck Constant
-    B = calibP['sensor_fixed_metadata']['calibration B'] # Function of wavelength; Planck Constant
-    F = calibP['sensor_fixed_metadata']['calibration F'] # Positive value (0-1); Planck Constant
-    J1 = calibP['sensor_fixed_metadata']['calibration J1'] # Global Gain
-    J0 = calibP['sensor_fixed_metadata']['calibration J0'] # Global Offset
+    R = float(calibP['sensor_fixed_metadata']['calibration R']) # Function of integration time and wavelength; Planck Constant
+    B = float(calibP['sensor_fixed_metadata']['calibration B']) # Function of wavelength; Planck Constant
+    F = float(calibP['sensor_fixed_metadata']['calibration F']) # Positive value (0-1); Planck Constant
+    J1 = float(calibP['sensor_fixed_metadata']['calibration J1']) # Global Gain
+    J0 = float(calibP['sensor_fixed_metadata']['calibration J0']) # Global Offset
 
     # Constant Atmospheric transmission parameter by Flir
-    a1 = calibP['sensor_fixed_metadata']['calibration alpha1']
-    a2 = calibP['sensor_fixed_metadata']['calibration alpha2']
-    X = calibP['sensor_fixed_metadata']['calibration X']
-    b1 = calibP['sensor_fixed_metadata']['calibration beta1']
-    b2 = calibP['sensor_fixed_metadata']['calibration beta2']
+    a1 = float(calibP['sensor_fixed_metadata']['calibration alpha1'])
+    a2 = float(calibP['sensor_fixed_metadata']['calibration alpha2'])
+    X = float(calibP['sensor_fixed_metadata']['calibration X'])
+    b1 = float(calibP['sensor_fixed_metadata']['calibration beta1'])
+    b2 = float(calibP['sensor_fixed_metadata']['calibration beta2'])
 
     # Constant for VPD computation (sqtrH2O)
     H2O_K1 = 1.56
@@ -132,8 +132,8 @@ def flirRawToTemperature(rawData, calibP):
     # Environmental factors
     # According to FLIR, atmospheric absorption under 10m object distance can be neglected, expecially under dry desert climate
 	# Assumption: Ambient Temperature ~= Shutter Temperature
-    shutter_temp = calibP['sensor_variable_metadata']['shutter temperature [K]']
-    T = float(shutter_temp) - 273.15 # Proxy for ambient temperature from the gantry
+    shutter_temp = float(calibP['sensor_variable_metadata']['shutter temperature [K]'])
+    T = shutter_temp - 273.15 # Proxy for ambient temperature from the gantry
     H = 0.1 # Gantry Relative Humidity; Try to pull dynamic value if possible
     D = 3.778 # Distance from sensor to target; scans in S17 onwards set camera_ref to 3.5 m from target, resulting in thermal_camera_ref at 3.778 m from target 
     E = 0.98 # Approximate emissivity of vegetation

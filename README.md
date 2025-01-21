@@ -52,5 +52,5 @@ Converted GeoTIFs in a single directory.
     - **Output directory:** '-o', '--outdir', default='flir2tif_out/'
                                         
 ## Executing example (using singularity)
-`singularity run -B $(pwd):/mnt --pwd /mnt/ docker://phytooracle/flir_bin_to_tif_s10 -m <metadata.json> <bin_dir> -z <zoffset>`
+`singularity run -B $(pwd):/mnt --pwd /mnt/ docker://phytooracle/flir_bin_to_tif_s17 -m <metadata.json> <bin_dir> -z <zoffset>`
 

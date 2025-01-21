@@ -18,6 +18,7 @@ from terrautils.spatial import scanalyzer_to_utm, scanalyzer_to_latlon, geojson_
 from terrautils.formats import create_geotiff
 import matplotlib.pyplot as plt
 from osgeo import gdal, osr
+import math
 
 
 # --------------------------------------------------

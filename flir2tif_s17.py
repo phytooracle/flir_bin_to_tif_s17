@@ -135,7 +135,7 @@ def flirRawToTemperature(rawData, calibP):
     # Environmental factors
     # According to FLIR, atmospheric absorption under 10m object distance can be neglected, expecially under dry desert climate
 	# Assumption: Ambient Temperature ~= Shutter Temperature
-    shutter_temp = 300.1#float(calibP['sensor_variable_metadata']['shutter temperature [K]'])
+    shutter_temp = float(calibP['sensor_variable_metadata']['shutter temperature [K]'])
     T = shutter_temp - 273.15 # Proxy for ambient temperature from the gantry
     H = 0.1 # Gantry Relative Humidity; Try to pull dynamic value if possible
     D = 3.778 # Distance from sensor to target; scans in S17 onwards set camera_ref to 3.5 m from target, resulting in thermal_camera_ref at 3.778 m from target 

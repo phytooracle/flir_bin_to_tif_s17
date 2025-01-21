@@ -75,7 +75,7 @@ def get_boundingbox(metadata, z_offset):
     gantry_y = float(meta['gantry_system_variable_metadata']['position y [m]']) + loc_gantry_y
     gantry_z = float(meta['gantry_system_variable_metadata']['position z [m]']) + loc_gantry_z + z_offset#offset in m
 
-    fov_x, fov_y = float(meta['sensor_fixed_metadata']['field of view x [m]']), float(meta['sensor_fixed_metadata']['field of view y [m]'])
+    fov_x, fov_y = float(meta['sensor_fixed_metadata']['field of view X [m]']), float(meta['sensor_fixed_metadata']['field of view y [m]'])
     
     img_height, img_width = 640, 480
     

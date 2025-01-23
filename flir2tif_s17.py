@@ -115,9 +115,9 @@ def flirRawToTemperature(rawData, calibP):
     # Camera-Specific constants output by FLIR camera 
     R = 19526.943359#float(calibP['sensor_fixed_metadata']['calibration R']) # Function of integration time and wavelength; Planck Constant
     B = 1477.599976#float(calibP['sensor_fixed_metadata']['calibration B']) # Function of wavelength; Planck Constant
-    F = 1.0#float(calibP['sensor_fixed_metadata']['calibration F']) # Positive value (0-1); Planck Constant
-    J1 = 29.777163#float(calibP['sensor_fixed_metadata']['calibration J1']) # Global Gain
-    J0 = 4455.0#float(calibP['sensor_fixed_metadata']['calibration J0']) # Global Offset
+    F = float(calibP['sensor_fixed_metadata']['calibration F']) # Positive value (0-1); Planck Constant
+    J1 = float(calibP['sensor_fixed_metadata']['calibration J1']) # Global Gain
+    J0 = float(calibP['sensor_fixed_metadata']['calibration J0']) # Global Offset
 
     # Constant Atmospheric transmission parameter by Flir
     a1 = float(calibP['sensor_fixed_metadata']['calibration alpha1'])

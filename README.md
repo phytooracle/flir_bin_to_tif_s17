@@ -1,16 +1,27 @@
-# FLIR BIN2TIF - Season 11, Sorghum
-
+# FLIR BIN2TIF - Season 17+
 This script converts BIN files to GeoTIFF images for thermal (FLIR) sensors.
 
-Re-calibrated transformer: converts bin to tif for gantry files (s11).
-Differences between s10 and s11:
-- S11 only contains center of agricultural plots, therefore no GCP lids are detectable. This is taken into consideration.
-- Apart from removing the S10 correction, the code used is very similar to the one for s10.
+This module includes a conversion for digital number to temperature by using camera internal calibration parameters and atmospheric values. Prior seasons have been calibrated using experimentally-derived polynomials relating DN, ambient temperature, and blackbody target temperature. This calibration process was not performed when the camera was replaced at the beginning of Season 17. Camera operation has changed as well, now focusing on full-field scanning. 
 
-Note that image height and width are collected from the provided metadata, including:
+Note that some values are collected from the provided metadata, including:
 
+sensor_fixed_metadata
 ```
-    img_height, img_width = 640, 480
+    location in camera box x [m]
+    location in camera box y [m]
+    location in camera box z [m]
+    field of view x [m]
+    field of view y [m]
+```
+gantry_system_variable_metadata
+```
+    position x [m]
+    position y [m]
+    position z [m]
+```
+sensor_variable_metadata
+```
+    shutter temperature [K]
 ```
 
 Also, a experimentally derived offset is applied:
@@ -41,5 +52,5 @@ Converted GeoTIFs in a single directory.
     - **Output directory:** '-o', '--outdir', default='flir2tif_out/'
                                         
 ## Executing example (using singularity)
-`singularity run -B $(pwd):/mnt --pwd /mnt/ docker://phytooracle/flir_bin_to_tif_s10 -m <metadata.json> <bin_dir>`
+`singularity run -B $(pwd):/mnt --pwd /mnt/ docker://phytooracle/flir_bin_to_tif_s17 -m <metadata.json> <bin_dir> -z <zoffset>`
 

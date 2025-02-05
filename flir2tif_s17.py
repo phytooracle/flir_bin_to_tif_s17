@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 Author : Emmanuel Gonzalez, Michele Cosi, Holly Ellingson, Jeffrey Demieville
-Note   : Parts of this code was initially developed by the AgPipeline and TERRA-REF teams.
+Note   : Parts of this code was initially developed by the AgPipeline and TERRA-REF teams. 
+         Several comments were added based on those found in TinoDornbusch's original code.
 Date   : 2020-07-09
-Purpose: Convert FLIR .bin files to .tif (Season 11)
+Purpose: Convert FLIR .bin files to .tif (Season 17+)
 """
 
 import argparse
@@ -17,6 +18,8 @@ from terrautils.spatial import scanalyzer_to_utm, scanalyzer_to_latlon, geojson_
 from terrautils.formats import create_geotiff
 import matplotlib.pyplot as plt
 from osgeo import gdal, osr
+import math
+from numpy.matlib import repmat
 
 
 # --------------------------------------------------
@@ -24,7 +27,7 @@ def get_args():
     """Get command-line arguments"""
 
     parser = argparse.ArgumentParser(
-        description='Season 11 flir2tif',
+        description='Season 17 flir2tif',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('bin',
@@ -74,7 +77,7 @@ def get_boundingbox(metadata, z_offset):
     gantry_y = float(meta['gantry_system_variable_metadata']['position y [m]']) + loc_gantry_y
     gantry_z = float(meta['gantry_system_variable_metadata']['position z [m]']) + loc_gantry_z + z_offset#offset in m
 
-    fov_x, fov_y = float(meta['sensor_fixed_metadata']['field of view x [m]']), float(meta['sensor_fixed_metadata']['field of view y [m]'])
+    fov_x, fov_y = float(meta['sensor_fixed_metadata']['field of view X [m]']), float(meta['sensor_fixed_metadata']['field of view y [m]'])
     
     img_height, img_width = 640, 480
     
@@ -107,62 +110,61 @@ def get_boundingbox(metadata, z_offset):
 
 # --------------------------------------------------
 def flirRawToTemperature(rawData, calibP):
-
-    shutter_temp = calibP['sensor_variable_metadata']['shutter temperature [K]']
-    T = float(shutter_temp) - 273.15
-
-    P_5_outmean = [1.137440642331793e-11,
-                   -7.151963918140453e-07,
-                   2.040023288027391e-02,
-                   -1.480567234537099e+02]
-    P_15_outmean = [1.081311914979629e-11,
-                    -7.016010881023338e-07,
-                    2.054630019627413e-02,
-                    -1.521561215301546e+02]
-    P_20_outmean = [7.884866004076222e-12,
-                    -5.627752964123624e-07,
-                    1.841833557270094e-02,
-                    -1.424489740528044e+02]
-    P_25_outmean = [9.583147873422692e-12,
-                    -6.411047671547955e-07,
-                    1.957403307722059e-02,
-                    -1.488744387542483e+02]
-    P_30_outmean = [7.731929583673130e-12,
-                    -5.450000399690083e-07,
-                    1.788280850465480e-02,
-                    -1.397155089900219e+02]
-    P_35_outmean = [9.979352154351443e-12,
-                    -6.638673059086900e-07,
-                    2.015587753410061e-02,
-                    -1.556220395053390e+02]
-    P_40_outmean = [1.113388420010232e-11,
-                    -7.376131006851630e-07,
-                    2.162806444290634e-02,
-                    -1.657425341330783e+02]
-    P_45_outmean = [8.689237696307418e-12,
-                    -6.008401296566917e-07,
-                    1.914217995514052e-02,
-                    -1.514361986681356e+02]
-    T_list = [5, 15, 20, 25, 30, 35, 40, 45]
-    a = [P_5_outmean[0], P_15_outmean[0], P_20_outmean[0],
-         P_25_outmean[0], P_30_outmean[0], P_35_outmean[0],
-         P_40_outmean[0], P_45_outmean[0]]
-    b = [P_5_outmean[1], P_15_outmean[1], P_20_outmean[1],
-         P_25_outmean[1], P_30_outmean[1], P_35_outmean[1],
-         P_40_outmean[1], P_45_outmean[1]]
-    c = [P_5_outmean[2], P_15_outmean[2], P_20_outmean[2],
-         P_25_outmean[2], P_30_outmean[2], P_35_outmean[2],
-         P_40_outmean[2], P_45_outmean[2]]
-    d = [P_5_outmean[3], P_15_outmean[3], P_20_outmean[3],
-         P_25_outmean[3], P_30_outmean[3], P_35_outmean[3],
-         P_40_outmean[3], P_45_outmean[3]]
-
-    # use numpy linear interpolation function to generate calibration coefficients for actual sensor temperature
-    P_val = [np.interp(T, T_list, a), np.interp(T, T_list, b),
-                       np.interp(T, T_list, c), np.interp(T, T_list, d)]
     im = rawData
-    pxl_temp = P_val[0]*im**3 + P_val[1]*im**2 + P_val[2]*im + P_val[3]
-    #pxl_temp = pxl_temp.astype(int)
+    
+    # Camera-Specific constants output by FLIR camera 
+    R = float(calibP['sensor_fixed_metadata']['calibration R']) # Function of integration time and wavelength; Planck Constant
+    B = float(calibP['sensor_fixed_metadata']['calibration B']) # Function of wavelength; Planck Constant
+    F = float(calibP['sensor_fixed_metadata']['calibration F']) # Positive value (0-1); Planck Constant
+    J1 = float(calibP['sensor_fixed_metadata']['calibration J1']) # Global Gain
+    J0 = float(calibP['sensor_fixed_metadata']['calibration J0']) # Global Offset
+
+    # Constant Atmospheric transmission parameter by Flir
+    a1 = float(calibP['sensor_fixed_metadata']['calibration alpha1'])
+    a2 = float(calibP['sensor_fixed_metadata']['calibration alpha2'])
+    X = float(calibP['sensor_fixed_metadata']['calibration X'])
+    b1 = float(calibP['sensor_fixed_metadata']['calibration beta1'])
+    b2 = float(calibP['sensor_fixed_metadata']['calibration beta2'])
+
+    # Constant for VPD computation (sqtrH2O)
+    H2O_K1 = 1.56
+    H2O_K2 = 0.0694
+    H2O_K3 = -0.000278
+    H2O_K4 = 0.000000685
+    
+    # Environmental factors
+    # According to FLIR, atmospheric absorption under 10m object distance can be neglected, expecially under dry desert climate
+	# Assumption: Ambient Temperature ~= Shutter Temperature
+    shutter_temp = float(calibP['sensor_variable_metadata']['shutter temperature [K]'])
+    T = shutter_temp - 273.15 # Proxy for ambient temperature from the gantry
+    H = 0.1 # Gantry Relative Humidity; Try to pull dynamic value if possible
+    D = 3.778 # Distance from sensor to target; scans in S17 onwards set camera_ref to 3.5 m from target, resulting in thermal_camera_ref at 3.778 m from target 
+    E = 0.98 # Approximate emissivity of vegetation
+
+    # Atmospheric Transmission
+
+    # VPD
+    H2OInGperM2 = H*math.exp(H2O_K1 + H2O_K2*T + H2O_K3*math.pow(T, 2) + H2O_K4*math.pow(T, 3))
+    
+    # Atmospheric Transmission Correction Tau
+    #**********************************************************************************************************************
+    tau = (X * math.exp(-math.sqrt(D / 2) * (a1 + b1 * math.sqrt(H2OInGperM2))) + (1 - X) * math.exp(-math.sqrt(D / 2) * (a2 + b2 * math.sqrt(H2OInGperM2))))
+
+    # Object Radiation obj_rad = Theoretical object radiation * emissivity * atmospheric transmission
+    obj_rad = im * E * tau
+
+    # Atmospheric Radiation atm_rad= (1 - atmospheric transmission) * Theoretical atmospheric radiation
+    theo_atm_rad = (R * J1 / (math.exp(B / shutter_temp) - F)) + J0
+    atm_rad = repmat((1 - tau) * theo_atm_rad, 640, 480)
+
+    # Ambient Reflection Radiation: amb_refl_rad = (1 - emissivity) * atmospheric transmission * Theoretical Ambient Reflection Radiation
+    theo_amb_refl_rad = (R * J1 / (math.exp(B / shutter_temp) - F)) + J0
+    amb_refl_rad = repmat((1 - E) * tau * theo_amb_refl_rad, 640, 480)
+
+    # Total Radiation
+    corr_pxl_val = obj_rad + atm_rad + amb_refl_rad
+    
+    pxl_temp = B / np.log(R /(corr_pxl_val - J0) * J1 + F) - 273.15 # Radial Basis Function (RBF)
 
     return pxl_temp
 

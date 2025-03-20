@@ -82,8 +82,8 @@ def get_boundingbox(metadata, z_offset):
     img_height, img_width = 640, 480
     
     B = gantry_z
-    A_x = np.arctan((0.5*float(fov_x))/2)
-    A_y = np.arctan((0.5*float(fov_y))/2)
+    A_x = np.arctan((0.5*float(fov_x))/2) # Assumes FOV in metadata calculates at 2m
+    A_y = np.arctan((0.5*float(fov_y))/2) # Assumes FOV in metadata calculates at 2m
     L_x = 2*B*np.tan(A_x)
     L_y = 2*B*np.tan(A_y)
 

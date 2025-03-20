@@ -96,10 +96,10 @@ def get_boundingbox(metadata, z_offset):
     bbox_se_latlon = scanalyzer_to_latlon(x_s, y_e)
 
     # TERRA-REF
-    lon_shift = 0.000020308287
+    lon_shift = 0 #0.000020308287
 
     # Drone
-    lat_shift = 0.000018292 #0.000015258894
+    lat_shift = 0 #0.000018292 #0.000015258894
     b_box =  ( bbox_se_latlon[0] - lat_shift,
                 bbox_nw_latlon[0] - lat_shift,
                 bbox_nw_latlon[1] + lon_shift,

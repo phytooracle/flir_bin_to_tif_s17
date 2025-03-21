@@ -99,7 +99,7 @@ def get_boundingbox(metadata, z_offset):
     lon_shift = 0.000020308287
 
     # Drone
-    lat_shift = 0.000018292 #0.000015258894
+    lat_shift = 0.0000130325
     b_box =  ( bbox_se_latlon[0] - lat_shift,
                 bbox_nw_latlon[0] - lat_shift,
                 bbox_nw_latlon[1] + lon_shift,
